@@ -2,11 +2,11 @@ package telran.measure;
 
 public class Length implements Comparable<Length> {
 	private float amount;
-	private LengthUnit lengthUnit;
+	private LengthUnit unit;
 
 	public Length(float amount, LengthUnit lengthUnit) {
 		this.amount = amount;
-		this.lengthUnit = lengthUnit;
+		this.unit = lengthUnit;
 	}
 
 	@Override
@@ -17,7 +17,7 @@ public class Length implements Comparable<Length> {
 		if (!(obj instanceof Length)) {
 			throw new IllegalArgumentException();
 		}
-		return amount / ((Length) obj).lengthUnit.value == ((Length) obj).amount / lengthUnit.value;
+		return compareTo((Length)obj) == 0;
 	}
 
 	@Override
@@ -28,8 +28,7 @@ public class Length implements Comparable<Length> {
 	 *         than "o" object, == 0 "this" object equals "o" object,
 	 */
 	public int compareTo(Length o) {
-		int res = (int) (amount - o.lengthUnit.value * o.amount / lengthUnit.value);
-		return res < 0 ? -1 : (res > 0 ? 1 : 0);
+		return Float.compare(amount, o.convert(unit).amount);
 	}
 
 	/**
@@ -39,19 +38,17 @@ public class Length implements Comparable<Length> {
 	 *         convert(LengthUnit.M) returns Length in meters
 	 */
 	public Length convert(LengthUnit unit) {
-		return new Length( amount * lengthUnit.value / unit.value, unit);
+		return new Length( amount * this.unit.value / unit.value, unit);
 	}
 
 	@Override
 	/**
 	 * returns string with amount and length unit pinned to amount with no space
 	 * Example: 20.0M (string expression of Length object presenting 20 meters)
-	 * format of float: trim all the nulls (0), but left not least than one digit after a decimal point
 	 */
 	public String toString() {
-		String amountStr = Float.toString(amount).replaceAll("(.*?)(\\.0||\\d)([0]+$)", "$1$2$3");
-		// if need just round to format #.#: String.format("%.1f%s", amount, lengthUnit.name());
-		return String.format("%s%s", amountStr, lengthUnit.name());		
+		String amountStr = Float.toString(amount);
+		return amountStr + unit.toString();	
 	}
 
 	public float getAmount() {
@@ -59,7 +56,7 @@ public class Length implements Comparable<Length> {
 	}
 
 	public LengthUnit getUnit() {
-		return lengthUnit;
+		return unit;
 	}
 
 }
